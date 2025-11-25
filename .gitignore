@@ -239,3 +239,6 @@ workflow.zip
 train_data/train_adata.h5ad
 test_data/test_adata.h5ad
 workflow/outputs/Wang_Ding-Yang_Project2.zip
+*/*.zip
+*/.DS_Store
+scGPT_CP/
