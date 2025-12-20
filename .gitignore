@@ -246,3 +246,13 @@ scGPT_CP_DAPT/work/adata_all_for_dapt.h5ad
 scGPT_human-20251125T184128Z-1-001.zip
 workflow - new/result_final/Wang_Ding-Yang_Project2.zip
 workflow - new.zip
+workflow - new/outputs_features_csv/all/features_3_5000_noPCA.csv
+workflow - new/outputs_features_csv/all/features_3_5000.csv
+**/**/*.csv
+workflow/outputs_features_csv/new_5/cv_means_ensemble.txt
+workflow/outputs_features_csv/new_5/cv_means_ensemble.txt
+workflow/outputs_features_csv/new_5/cv_summary_ensemble.csv
+workflow - new/outputs_features_csv/all/cv_means_ensemble.txt
+workflow - new/scripts/.DS_Store
+workflow/outputs_features_csv/new_5/cv_means_ensemble.txt
+workflow/outputs_features_csv/new_5/cv_summary_ensemble.csv
