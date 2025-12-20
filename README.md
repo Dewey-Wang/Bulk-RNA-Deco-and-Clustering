@@ -1,143 +1,135 @@
-## 🧬 Bulk RNA-seq Deconvolution
+# ML4G Project 2 — RNA-seq Deconvolution & Cell-type Classification
 
-This project performs **bulk RNA-seq deconvolution** to estimate cell-type proportions by integrating single-cell RNA-seq (scRNA-seq) reference data with bulk expression profiles. The proposed pipeline is designed to be **robust to batch effects, compositional constraints, and patient-level data leakage**.
+> Characterize the tumor microenvironment of esophageal adenocarcinoma  
+> using joint bulk RNA-seq deconvolution and single-cell RNA-seq clustering.  
+> Strong preprocessing, biologically informed features, and leakage-aware validation.
 
-### Overview of the Strategy
+**Result:** Ranked **🥉 3rd** in **ETH Zürich – Machine Learning for Genomics (263-5351-00L, HS2025)** Project 2, supervised by **Prof. Valentina Boeva** (Head TA: **Lovro Rabuzin**).
 
-Our deconvolution approach combines:
-
-* **Marker-based feature selection from scRNA-seq**
-* **Joint preprocessing of bulk train and test data**
-* **Compositional regression using ILR-transformed proportions**
-* **Patient-aware cross-validation (Leave-One-Patient-Out, LOPO)**
-* **Bagging across inner folds with simplex-consistent aggregation**
-
-The final output is a matrix of predicted cell-type proportions that lies strictly on the probability simplex (non-negative and summing to 1).
+See the full project description here: [ML4G_Project_2_deconv.pdf](./ML4G_Project_2_deconv.pdf)
 
 ---
 
-### 1. Single-cell Reference Processing and Marker Selection
+## 🏆 Final Results & Robustness
 
-Only the **training scRNA-seq dataset** is used to derive cell-type information.
+- **Final ranking:** 🥉 **3rd place**
 
-1. **Preprocessing**
+**Clustering task**
+- **Local (train outer-CV) score:** **0.857**
+- **Online (test) score:** **0.855**
 
-   * Cell filtering (`min_genes = 200`)
-   * Gene filtering (`min_cells = 3`)
-   * Library-size normalization (`1e4`)
-   * Log-transformation (`log1p`)
+**Deconvolution task**
+- **Local (train outer-CV) score:** **0.046**
+- **Online (test) score:** **0.043**
 
-2. **Pseudobulk construction**
+The **near-identical local and online scores** indicate that the proposed pipeline:
+- generalizes well to unseen data
+- effectively avoids information leakage
+- is robust to distribution shifts between training and test samples
+  
+---
 
-   * For each `(Sample, CellType)` pair, we compute the **mean expression profile** across cells.
-   * This yields a pseudobulk matrix with columns of the form `Sample|CellType`.
+## High-level Method Summary
 
-3. **Batch correction**
+The pipeline is organized into **two main components**, each documented in detail in its own folder.
 
-   * ComBat is applied to pseudobulk profiles, using **Sample** as the batch variable, to reduce technical variation across samples.
-
-4. **Stratified marker gene selection**
-
-   * For each cell type, we compute a log-fold-change–like score against all other cell types.
-   * The top *K* genes per cell type are selected.
-   * The final marker set is the **union of per-cell-type top markers**, ensuring balanced representation across cell types.
+```text
+Workflow/
+├─► Clustering (representation learning → classification)
+└─► Deconvolution (bulk → cell-type proportions)
+````
 
 ---
 
-### 2. Joint Bulk Data Preprocessing (Train + Test)
+## 1. Clustering & Cell-type Classification
 
-To avoid train–test distribution mismatch, **bulk training and test samples are preprocessed jointly**, without dimensionality reduction.
+📁 **`Workflow/Clustering/`**
 
-Steps:
+This component addresses the **single-cell clustering / classification task**.
 
-1. **CPM normalization (CP10k)**
-2. **Joint winsorization**
+**Key ideas**
 
-   * Per-gene clipping at the 99.5th percentile across train + test
-3. **Variance-stabilizing transformation**
+* Learn a **shared, batch-corrected embedding** for train + test cells
+* Perform classification in this low-dimensional space using leakage-aware validation
 
-   * `asinh(x / c)` with `c = 1.0`
+**Method summary**
 
-> ⚠️ No PCA is applied. All regressions are performed directly in gene space.
+* Feature construction:
 
----
+  * Highly variable genes (HVGs)
+  * ∪ train-only cell-type marker genes
+* Dimension reduction & batch correction:
 
-### 3. Compositional Modeling with ILR Transformation
+  * PCA + Harmony (using `Sample` / `Patient`)
+* Classification:
 
-Cell-type proportions are compositional data and must satisfy:
+  * LightGBM, KNN, Ridge
+  * ensemble arbiter to select the most reliable model per cell
+* Robustness:
 
-* Non-negativity
-* Sum-to-one constraint
+  * Stage 2 is run under **three different CV / model conditions**
+  * Final predictions are obtained by **majority vote across the three runs**
 
-To model this correctly:
-
-* Ground-truth proportions are transformed using the **Isometric Log-Ratio (ILR)** transform with a Helmert basis.
-* Regression is performed in ILR space.
-* Predictions are mapped back to the simplex via **inverse ILR**, followed by explicit simplex projection.
-
-This ensures all predictions are valid probability vectors.
+👉 See **`Workflow/Clustering/README.md`** for full details.
 
 ---
 
-### 4. Patient-aware Training: LOPO + Inner K-Fold
+## 2. Bulk RNA-seq Deconvolution
 
-To prevent information leakage across patients, we adopt a **nested cross-validation strategy**:
+📁 **`Workflow/Deconvolution/`**
 
-* **Outer loop**: Leave-One-Patient-Out (LOPO)
+This component estimates **cell-type proportions** from bulk RNA-seq samples.
 
-  * All bulk samples from one patient are held out for evaluation.
-* **Inner loop**: K-fold CV over remaining patients
+**Key ideas**
 
-  * Used for marker selection and model fitting.
+* Strong joint preprocessing of bulk train + test data
+* Linear regression in a compositional (proportion-aware) space
+* Strict patient-aware evaluation
 
-Within each inner fold:
+**Method summary**
 
-* Marker genes are re-selected **using only inner-training patients**
-* A **Ridge regression** model is trained in ILR space
+* Bulk preprocessing:
 
----
+  * CP10k normalization
+  * Winsorization
+  * asinh variance stabilization
+* Feature construction:
 
-### 5. Prediction Aggregation (Bagging in the Simplex)
+  * Marker genes derived from scRNA-seq
+* Model:
 
-For each bulk sample:
+  * ILR-transformed Ridge regression
+* Evaluation:
 
-* Multiple predictions are obtained across inner folds
-* Each prediction is projected onto the simplex
-* Final prediction is computed as the **mean in simplex space**
+  * Leave-One-Patient-Out (LOPO) cross-validation
+* Design focus:
 
-This aggregation strategy:
+  * robustness under **very limited training samples**
 
-* Reduces variance
-* Preserves compositional validity
-* Improves robustness to fold-specific marker variation
-
----
-
-### 6. Evaluation and Output
-
-**Training evaluation**
-
-* Metric: Root Mean Squared Error (RMSE)
-* Computed per cell type and averaged across cell types
-* Evaluation strictly follows the LOPO protocol
-
-**Test prediction**
-
-* Final proportions are generated by aggregating predictions across all outer × inner folds
-* Output format:
-
-  * Rows: bulk samples
-  * Columns: ordered cell types
-  * Each row sums to 1
+👉 See **`Workflow/Deconvolution/README.md`** for full details.
 
 ---
 
-### Key Design Choices
+## Environment
 
-* ✅ Patient-level separation (no leakage)
-* ✅ Joint preprocessing to stabilize distributions
-* ✅ Marker selection inside CV loop
-* ✅ Proper handling of compositional data (ILR)
-* ✅ No PCA to preserve gene-level interpretability
+* Exact versions are pinned in **`./environment.yml`**.
 
 ---
+
+## License & Citation
+
+**CC BY-NC 4.0** (non-commercial, attribution required).
+
+Please cite:
+
+> Wang, Ding-Yang. *ML4G Project 2 – Bulk deconvolution and single-cell clustering*. GitHub repository, 2025.
+
+```bibtex
+@misc{wang2025ml4g,
+  author       = {Wang, Ding-Yang},
+  title        = {ML4G Project 2 – Bulk deconvolution and single-cell clustering},
+  year         = {2025},
+  howpublished = {\url{https://github.com/Dewey-Wang/Bulk-RNA-Deco-and-Clustering.git}},
+  note         = {Non-commercial use; citation required}
+}
+```

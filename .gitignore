@@ -236,8 +236,8 @@ $RECYCLE.BIN/
 
 dummy_task2.zip
 workflow.zip
-train_data/train_adata.h5ad
-test_data/test_adata.h5ad
+Dataset/train_data/train_adata.h5ad
+Dataset/test_data/test_adata.h5ad
 workflow/outputs/Wang_Ding-Yang_Project2.zip
 */*.zip
 */.DS_Store
