@@ -240,7 +240,7 @@ Dataset/train_data/train_adata.h5ad
 Dataset/test_data/test_adata.h5ad
 workflow/outputs/Wang_Ding-Yang_Project2.zip
 */*.zip
-*/.DS_Store
+**/.DS_Store
 scGPT_CP/
 scGPT_CP_DAPT/work/adata_all_for_dapt.h5ad
 scGPT_human-20251125T184128Z-1-001.zip

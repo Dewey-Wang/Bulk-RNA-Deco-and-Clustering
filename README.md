@@ -37,6 +37,7 @@ The pipeline is organized into **two main components**, each documented in detai
 Workflow/
 ├─► Clustering (representation learning → classification)
 └─► Deconvolution (bulk → cell-type proportions)
+└─► Prediction (results)
 ````
 
 ---
