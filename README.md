@@ -115,7 +115,9 @@ This component estimates **cell-type proportions** from bulk RNA-seq samples.
 ## Data
 
 The **ML4G_Project_1_Data** folder data is available via **Polybox**:
+
 **Link:** [https://polybox.ethz.ch/index.php/s/TFJwmbAg488e7oL](https://polybox.ethz.ch/index.php/s/TFJwmbAg488e7oL)
+
 **Password:** `single_cell_2025`
 
 Place downloaded data under the repo root (the Docker command above mounts it to `/workspace`).
