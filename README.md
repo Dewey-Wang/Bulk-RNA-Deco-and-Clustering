@@ -120,7 +120,7 @@ The **ML4G_Project_1_Data** folder data is available via **Polybox**:
 
 **Password:** `single_cell_2025`
 
-Place downloaded data under the repo root (the Docker command above mounts it to `/workspace`).
+Place downloaded data under the repo root `/Dataset`.
 
 ---
 
