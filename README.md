@@ -116,7 +116,7 @@ This component estimates **cell-type proportions** from bulk RNA-seq samples.
 
 The full dataset (including both train and test data) is hosted on Hugging Face:
 
-👉 https://huggingface.co/datasets/Dewey0115/ETH_ML4G_Project-2
+👉 https://huggingface.co/datasets/DeweyWang/ETH_ML4G_Project-2
 
 ### Download Options
 
@@ -126,7 +126,7 @@ The full dataset (including both train and test data) is hosted on Hugging Face:
 pip install -U huggingface_hub
 
 # download entire dataset
-hf download Dewey0115/ETH_ML4G_Project-2 \
+hf download DeweyWang/ETH_ML4G_Project-2 \
   --repo-type dataset \
   --local-dir Dataset/
 ```
