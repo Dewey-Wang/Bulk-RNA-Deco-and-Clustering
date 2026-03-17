@@ -112,15 +112,24 @@ This component estimates **cell-type proportions** from bulk RNA-seq samples.
 
 ---
 
-## Data
+## Dataset (Hugging Face)
 
-The **ML4G_Project_1_Data** folder data is available via **Polybox**:
+The full dataset (including both train and test data) is hosted on Hugging Face:
 
-**Link:** [https://polybox.ethz.ch/index.php/s/TFJwmbAg488e7oL](https://polybox.ethz.ch/index.php/s/TFJwmbAg488e7oL)
+👉 https://huggingface.co/datasets/Dewey0115/ETH_ML4G_Project-2
 
-**Password:** `single_cell_2025`
+### Download Options
 
-Place downloaded data under the repo root `/Dataset`.
+#### Hugging Face CLI 
+
+```bash
+pip install -U huggingface_hub
+
+# download entire dataset
+hf download Dewey0115/ETH_ML4G_Project-2 \
+  --repo-type dataset \
+  --local-dir Dataset/
+```
 
 ---
 
